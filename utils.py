@@ -1,5 +1,10 @@
 import math
 
+MAX_ALPHA = 1000
+INF = 1000*1000
+MIN_EPS = 0.0000001
+# Alpha should not be greater than 1000
+
 class Point:
     """ Create a new Point, at coordinates x, y """
 
@@ -37,15 +42,16 @@ class PointAddress:
 
 class PointUtil:
 
-    def __init__(self, eps, alpha):
+    def __init__(self, eps=0.1, alpha=1):
         self.eps = eps
         self.alpha_cells = int((1.0*2*math.sqrt(2))/eps) + 1
-        self.cell_width = self.alpha / self.alpha_cells
+        self.cell_width = alpha / self.alpha_cells
 
-    @staticmethod
-    def get_min_max_dis(point_addr_1, point_addr_2):
-        from_points = get_corners(*point_addr_1)
-        to_points = get_corners(*point_addr_2)
+    def get_min_max_dis(self, x_addr_1, y_addr_1, x_addr_2, y_addr_2):
+        p_addr_1 = PointAddress(x_addr_1, y_addr_1, self.cell_width)
+        p_addr_2 = PointAddress(x_addr_2, y_addr_2, self.cell_width)
+        from_points = p_addr_1.get_corners()
+        to_points = p_addr_2.get_corners()
         min_dis = INF
         max_dis = 0
         for p1 in from_points:
@@ -54,3 +60,8 @@ class PointUtil:
                 min_dis = min(min_dis, dis)
                 max_dis = max(max_dis, dis)
         return min_dis, max_dis
+
+    def get_point_address(self, point):
+        x_addr = math.floor(point.x / self.cell_width)
+        y_addr = math.floor(point.y / self.cell_width)
+        return PointAddress(x_addr, y_addr, self.cell_width)
