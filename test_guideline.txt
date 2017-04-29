@@ -1,0 +1,7 @@
+# run -> python main_one_center.py t1.in 
+eps max_radius window_size # x and y max = max_radius * sqrt(2) / 2
+insert_random number_of_points # generate number_of_points random points
+insert_exact number_of_points x y # insert number_of_points points located in (x,y)
+insert_in_range number_of_points x1 y1 x2 y2 # insert number_of_points random \
+                        #points located in a square with left_bottom (x1,y1) \
+                        #                                right_top (x2,y2)

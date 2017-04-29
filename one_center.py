@@ -134,6 +134,12 @@ class OneCenterSimulator:
         return Point(x, y)
 
     @staticmethod
+    def generate_customized_random_point(x_0, y_0, x_1, y_1):
+        x = random.random() * (x_1 - x_0) + x_0
+        y = random.random() * (y_1 - y_0) + y_0
+        return Point(x, y)
+
+    @staticmethod
     def find_one_center(entry_points):
         radius = INF
         center = None
@@ -163,8 +169,8 @@ class OneCenterSimulator:
         return new_entry_point
 
 
-    def execute_one_cycle(self):
-        new_entry_point = self.insert_entry_point()
+    def execute_one_cycle(self, new_point=None):
+        new_entry_point = self.insert_entry_point(new_point)
         oc_result = INF
         ocs_result = None
         for ocs in self.oc_solvers:

@@ -1,0 +1,9 @@
+0.95 10000 5
+insert_random 10
+insert_exact 5 0 0
+insert_exact 1 1 1
+insert_exact 1 2 2
+insert_exact 1 4 4
+insert_exact 1 8 8
+insert_exact 1 20 20
+insert_in_range 5 -100 -100 -95 -95
