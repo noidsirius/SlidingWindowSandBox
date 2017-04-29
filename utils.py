@@ -19,6 +19,12 @@ class Point:
     def move(self, vec):
         return Point( self.x + vec.x, self.y + vec.y)
 
+    def __str__(self):
+        return "(%f, %f)" % (self.x, self.y)
+
+    def __repr__(self):
+        return "(%f, %f)" % (self.x, self.y)
+
 class PointAddress:
 
     """ i, j represents the bottom left corner of the cell """
@@ -39,13 +45,27 @@ class PointAddress:
                 ret_list.append( center_point.move(Point(d_x, d_y)))
         return ret_list
 
+    def distance(self, p_addr):
+        from_points = self.get_corners()
+        to_points = p_addr.get_corners()
+        max_dis = 0
+        for p1 in from_points:
+            for p2 in to_points:
+                dis = p1.distance(p2)
+                max_dis = max(max_dis, dis)
+        return max_dis
+
 
 class PointUtil:
 
-    def __init__(self, eps=0.1, alpha=1):
+    def __init__(self, eps=0.1, alpha=1, alpha_cells=0):
         self.eps = eps
-        self.alpha_cells = int((1.0*2*math.sqrt(2))/eps) + 1
-        self.cell_width = alpha / self.alpha_cells
+        if alpha_cells == 0:
+            self.alpha_cells = int(math.ceil((1.0*2*math.sqrt(2))/(1.0*eps)))
+        else:
+            self.alpha_cells = alpha_cells
+        self.alpha = alpha
+        self.cell_width = 1.0*self.alpha / self.alpha_cells
 
     def get_min_max_dis(self, x_addr_1, y_addr_1, x_addr_2, y_addr_2):
         p_addr_1 = PointAddress(x_addr_1, y_addr_1, self.cell_width)
@@ -65,3 +85,28 @@ class PointUtil:
         x_addr = math.floor(point.x / self.cell_width)
         y_addr = math.floor(point.y / self.cell_width)
         return PointAddress(x_addr, y_addr, self.cell_width)
+
+    def get_cell_distance(self, point1, point2):
+        p_addr_1 = self.get_point_address(point1)
+        p_addr_2 = self.get_point_address(point2)
+        return p_addr_1.distance(p_addr_2)
+
+    def calculate_real_eps(self):
+        m = self.alpha_cells
+
+        point_address_x_range = (-m, m+1)
+        point_address_y_range = (-m, m+1)
+
+        min_dis = INF
+        max_dis = 0
+        for i in range(*point_address_x_range):
+            for j in range(*point_address_y_range):
+                if i == 0 and j == 0:
+                    continue
+                tmp_min, tmp_max = self.get_min_max_dis(0, 0, i, j)
+                if tmp_max < self.alpha or tmp_min > self.alpha:
+                    continue
+                min_dis = min(min_dis, tmp_min)
+                max_dis = max(max_dis, tmp_max)
+
+        return max(self.alpha-min_dis, max_dis - self.alpha) / self.alpha
