@@ -204,7 +204,7 @@ class OneCenterSimulator:
         ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
 
 
-oc_simulator = OneCenterSimulator(0.5, max_radius=5, window_size=4)
+oc_simulator = OneCenterSimulator(0.5, max_radius=5, window_size=3)
 
 def just_do_it():
     for i in range(10000):
@@ -219,7 +219,7 @@ def just_do_it():
           [len(ocs.my_alpha_entry_points) for ocs in oc_simulator.oc_solvers]
 
         # in case of any bug
-        if is_correct == False:
+        if is_correct == False and not expected_radius <= oc_simulator.eps :
             print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
             draw_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
             ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
