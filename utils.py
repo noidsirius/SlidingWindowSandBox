@@ -91,6 +91,11 @@ class PointUtil:
         p_addr_2 = self.get_point_address(point2)
         return p_addr_1.distance(p_addr_2)
 
+    def is_in_same_cell(self, point1, point2):
+        p_addr_1 = self.get_point_address(point1)
+        p_addr_2 = self.get_point_address(point2)
+        return p_addr_1.x_addr == p_addr_2.x_addr and p_addr_1.y_addr == p_addr_2.y_addr
+
     def calculate_real_eps(self):
         m = self.alpha_cells
 
