@@ -30,8 +30,8 @@ class EntryPoint:
         return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
 
 def generate_random_point(max_radius=MAX_ALPHA):
-    x = random.random() * max_radius - max_radius
-    y = random.random() * max_radius - max_radius
+    x = random.random() * max_radius - max_radius/2
+    y = random.random() * max_radius - max_radius/2
     return Point(x, y)
 
 def insert_entry_point(point = None):
@@ -56,8 +56,9 @@ def find_one_center(entry_points):
     center = None
     for i in range(len(entry_points)-1):
         min_i_radius = 0
-        for ep in entry_points[i+1:]:
-            min_i_radius = max(min_i_radius, ep.point.distance(entry_points[i].point))
+        min_i_radius = max([ep.point.distance(entry_points[i].point) for ep in entry_points[i+1:]])
+        # for ep in entry_points[i+1:]:
+        #     min_i_radius = max(min_i_radius, ep.point.distance(entry_points[i].point))
         if min_i_radius < radius:
             radius, center = min_i_radius,  entry_points[i]
     return radius, center
@@ -66,9 +67,9 @@ def find_one_cell_center(entry_points, point_util):
     radius = INF
     center = None
     for i in range(len(entry_points)-1):
-        min_i_radius = 0
-        for ep in entry_points[i+1:]:
-            min_i_radius = max(min_i_radius, point_util.get_cell_distance(ep.point, entry_points[i].point))
+        min_i_radius = max([point_util.get_cell_distance(ep.point, entry_points[i].point) for ep in entry_points[i+1:]])
+        # for ep in entry_points[i+1:]:
+        #     min_i_radius = max(min_i_radius, point_util.get_cell_distance(ep.point, entry_points[i].point))
         if min_i_radius < radius:
             radius, center = min_i_radius,  entry_points[i]
     return radius, center
@@ -131,22 +132,39 @@ def just_do_it():
                 oc_result = ocs.radius
                 ocs_result = ocs
         # print len(oc_solver_3.my_alpha_entry_points)
-        expected_radius = find_one_center(alive_points)[0]
+        expected_radius, expected_center = find_one_center(alive_points)
         # print current_time, expected_radius, oc_result, (oc_result / expected_radius)
-        is_correct = (oc_result / expected_radius) < (1 + eps_tmp)
+        is_correct = (oc_result / expected_radius) < (1 + eps_tmp*1.1)
 
         print current_time, is_correct , expected_radius, oc_result
         if not is_correct:
             expected_points_str = ""
             x_points = []
             y_points = []
+            plot_points = []
             for ep in alive_points:
                 x_points.append(ep.point.x)
                 y_points.append(ep.point.y)
+                plot_points.append([ep.point.x, ep.point.y])
+            oc_x_points = []
+            oc_y_points = []
+            for ep in ocs_result.my_alpha_entry_points:
+                cell_point = ocs_result.point_util.get_point_address(ep.point).get_center_point()
+                oc_x_points.append(cell_point.x)
+                oc_y_points.append(cell_point.y)
+                # plot_points.append([ep.point.x, ep.point.y])
             import matplotlib.pyplot as plt
+            import numpy
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            p = ax.plot(x_points, y_points, 'b')
+            ax.set_xticks(numpy.arange(-max_radius/2, max_radius/2, ocs_result.point_util.cell_width))
+            ax.set_yticks(numpy.arange(-max_radius/2, max_radius/2, ocs_result.point_util.cell_width))
+            plt.grid()
+            circle1 = plt.Circle((expected_center.point.x, expected_center.point.y), max_radius, color='g')
+            ax.add_artist(circle1)
+            p = ax.plot(x_points, y_points, 'rs', oc_x_points, oc_y_points, 'b^')
+            print plot_points
+            # p = ax.plot(*zip(*plot_points), 'b')
             ax.set_xlabel('x-points')
             ax.set_ylabel('y-points')
             ax.set_title('Simple XY point plot')
