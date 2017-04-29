@@ -3,29 +3,6 @@ import math
 
 from utils import *
 
-WINDOW_SIZE = 20
-MAX_RADIUS = 10
-
-class EntryPoint:
-    def __init__(self, point, entry_time=0, window_size=WINDOW_SIZE):
-        self.point = point
-        self.age = 0
-        self.entry_time = entry_time
-        self.point_addr = None
-        self.window_size = window_size
-
-    def increase_age_one(self):
-        self.age += 1
-
-    def is_alive(self):
-        return self.age < self.window_size
-
-    def __str__(self):
-        return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
-
-    def __repr__(self):
-        return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
-
 
 def get_points_of_entries(entry_points):
     return [ep.point for ep in entry_points]
@@ -92,7 +69,7 @@ def get_point_coord(point, is_point_class):
     return x,y
 
 # point_series => [entry_points, center, radius]
-def draw_points_series(point_series, cell_width = 1, is_point_class=True):
+def draw_oc_points_series(point_series, cell_width = 1, is_point_class=True):
 
     import matplotlib.pyplot as plt
     import numpy
@@ -137,7 +114,7 @@ def draw_points_series(point_series, cell_width = 1, is_point_class=True):
 
 class OneCenterSimulator:
     def __init__(self, eps, max_radius=MAX_RADIUS, window_size=WINDOW_SIZE):
-        self.eps = eps
+        self.eps = eps / 2
         self.max_radius = max_radius
         self.oc_solvers = []
         self.current_time = 0
@@ -202,26 +179,3 @@ class OneCenterSimulator:
         expected_center, expected_radius, ocs_result = self.execute_one_cycle()
         draw_points_series([(get_points_of_entries(self.alive_points), expected_center.point, expected_radius),
         ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
-
-
-oc_simulator = OneCenterSimulator(0.5, max_radius=5, window_size=3)
-
-def just_do_it():
-    for i in range(10000):
-        expected_center, expected_radius, ocs_result = oc_simulator.execute_one_cycle()
-        if len(oc_simulator.alive_points) == 1:
-            print "It's only one point"
-            continue
-        is_correct = (ocs_result.radius / expected_radius) < (1 + oc_simulator.eps*1.1) and expected_radius <= ocs_result.radius
-
-        print oc_simulator.current_time, is_correct , len(oc_simulator.alive_points),\
-         len(ocs_result.my_alpha_entry_points),\
-          [len(ocs.my_alpha_entry_points) for ocs in oc_simulator.oc_solvers]
-
-        # in case of any bug
-        if is_correct == False and not expected_radius <= oc_simulator.eps :
-            print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
-            draw_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
-            ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
-            print oc_simulator.alive_points, ocs_result.my_alpha_entry_points, ocs_result.alpha
-            break

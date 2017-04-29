@@ -3,6 +3,8 @@ import math
 MAX_ALPHA = 1000
 INF = 1000*1000
 MIN_EPS = 0.0000001
+WINDOW_SIZE = 20
+MAX_RADIUS = 10
 # Alpha should not be greater than 1000
 
 class Point:
@@ -24,6 +26,28 @@ class Point:
 
     def __repr__(self):
         return "(%f, %f)" % (self.x, self.y)
+
+
+class EntryPoint:
+    def __init__(self, point, entry_time=0, window_size=WINDOW_SIZE):
+        self.point = point
+        self.age = 0
+        self.entry_time = entry_time
+        self.point_addr = None
+        self.window_size = window_size
+
+    def increase_age_one(self):
+        self.age += 1
+
+    def is_alive(self):
+        return self.age < self.window_size
+
+    def __str__(self):
+        return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
+
+    def __repr__(self):
+        return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
+
 
 class PointAddress:
 
@@ -94,7 +118,8 @@ class PointUtil:
     def is_in_same_cell(self, point1, point2):
         p_addr_1 = self.get_point_address(point1)
         p_addr_2 = self.get_point_address(point2)
-        return p_addr_1.x_addr == p_addr_2.x_addr and p_addr_1.y_addr == p_addr_2.y_addr
+        return p_addr_1.x_addr == p_addr_2.x_addr \
+                and p_addr_1.y_addr == p_addr_2.y_addr
 
     def calculate_real_eps(self):
         m = self.alpha_cells
