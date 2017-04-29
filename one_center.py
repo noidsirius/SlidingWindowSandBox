@@ -67,12 +67,6 @@ class OneCenterSolver:
         elif r_radius < max_valid_distance:
             self.center = r_center
             self.radius = r_radius
-            # last_recent_farthest_ep_index = None
-            # for index, ep in enumerate(self.my_alpha_entry_points):
-            #     if self.point_util.get_cell_distance(self.center.point, ep.point) >= r_radius:
-            #         last_recent_farthest_ep_index = index
-            # if self.my_alpha_entry_points[last_recent_farthest_ep_index].age > self.center.age:
-            #     self.my_alpha_entry_points = self.my_alpha_entry_points[last_recent_farthest_ep_index:]
         else:
             last_recent_farthest_ep = None
             for ep in self.my_alpha_entry_points:
@@ -210,7 +204,7 @@ class OneCenterSimulator:
         ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
 
 
-oc_simulator = OneCenterSimulator(0.5, max_radius=5, window_size=8)
+oc_simulator = OneCenterSimulator(0.5, max_radius=5, window_size=4)
 
 def just_do_it():
     for i in range(10000):
