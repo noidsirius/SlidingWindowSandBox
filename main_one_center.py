@@ -15,8 +15,8 @@ def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=
             print "It's only one point"
             continue
 
-        is_correct = (ocs_result.radius / expected_radius) < (1 + oc_simulator.eps*1.1) and expected_radius <= ocs_result.radius
-
+        # is_correct = (ocs_result.radius / expected_radius) <= (1 + eps) and expected_radius <= ocs_result.radius
+        is_correct = ocs_result.alpha <= expected_radius <= ocs_result.alpha * (1+eps)
         print oc_simulator.current_time, is_correct, expected_radius, ocs_result.radius, ocs_result.alpha
         # print oc_simulator.current_time, is_correct, ocs_result.radius, expected_radius ,\
         #  len(oc_simulator.alive_points),\
@@ -62,7 +62,8 @@ def init_points(file_name):
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        run_simulator()
+        # run_simulator()
+        run_simulator(simulation_time=1000, eps=0.5, max_radius=10, window_size=3)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)

@@ -94,9 +94,9 @@ class PointAddress:
 class PointUtil:
 
     def __init__(self, eps=0.1, alpha=1, alpha_cells=0):
-        self.eps = eps
+        self.eps = eps / 2
         if alpha_cells == 0:
-            self.alpha_cells = int(math.ceil((1.0*2*math.sqrt(2))/(1.0*eps)))
+            self.alpha_cells = int(math.ceil((1.0*2*math.sqrt(2))/(1.0*self.eps)))
         else:
             self.alpha_cells = alpha_cells
         self.alpha = alpha
@@ -145,7 +145,7 @@ class PointUtil:
                 and p_addr_1.y_addr == p_addr_2.y_addr
 
     def calculate_real_eps(self):
-        m = self.alpha_cells
+        m = self.alpha_cells / 2
 
         point_address_x_range = (-m, m+1)
         point_address_y_range = (-m, m+1)

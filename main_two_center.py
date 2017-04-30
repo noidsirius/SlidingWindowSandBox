@@ -16,8 +16,8 @@ def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=
             print "Radius is 0", tcs_result.radius
             continue
         # print tc_simulator.current_time, expected_radius, tcs_result.radius
-        is_correct = (tcs_result.radius / expected_radius) < (1 + tc_simulator.eps*1.1) and expected_radius <= tcs_result.radius
-
+        # is_correct = (tcs_result.radius / expected_radius) < (1 + tc_simulator.eps*1.1) and expected_radius <= tcs_result.radius
+        is_correct = tcs_result.alpha <= expected_radius <= tcs_result.alpha * (1+eps)
         print tc_simulator.current_time, is_correct, expected_radius, tcs_result.radius, tcs_result.alpha
         # # print oc_simulator.current_time, is_correct, ocs_result.radius, expected_radius ,\
         # #  len(oc_simulator.alive_points),\

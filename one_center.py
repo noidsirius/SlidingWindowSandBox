@@ -33,8 +33,13 @@ class OneCenterSolver:
             if not ep.is_alive() or self.point_util.is_in_same_cell(ep.point, new_entry_point.point):
                 self.my_alpha_entry_points.remove(ep)
         self.my_alpha_entry_points.append(new_entry_point)
-        r_radius, r_center = OneCenterSolver.find_one_cell_center(self.my_alpha_entry_points, self.point_util)
         max_valid_distance = self.alpha *(1 + self.eps)
+        if self.center and self.center.is_alive():
+            cell_dis = self.point_util.get_cell_distance(new_entry_point.point, self.center.point)
+            if cell_dis <= max_valid_distance:
+                self.radius = max(self.radius, cell_dis)
+                return
+        r_radius, r_center = OneCenterSolver.find_one_cell_center(self.my_alpha_entry_points, self.point_util)
         if r_center is None and len(self.my_alpha_entry_points) == 1:
             self.center = self.my_alpha_entry_points[0]
             self.radius = 0
@@ -60,14 +65,14 @@ class OneCenterSolver:
 
 
 # point_series => [entry_points, center, radius]
-def draw_oc_points_series(point_series, cell_width = 1, is_point_class=True):
+def draw_oc_points_series(point_series, cell_width = 1, is_point_class=True, max_radius=MAX_RADIUS):
 
     import matplotlib.pyplot as plt
     import numpy
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_xticks(numpy.arange(1.0*-MAX_RADIUS/2, 1.0*MAX_RADIUS/2, cell_width))
-    ax.set_yticks(numpy.arange(1.0*-MAX_RADIUS/2, 1.0*MAX_RADIUS/2, cell_width))
+    ax.set_xticks(numpy.arange(1.0*-max_radius/2, 1.0*max_radius/2, cell_width))
+    ax.set_yticks(numpy.arange(1.0*-max_radius/2, 1.0*max_radius/2, cell_width))
     ax.set_autoscale_on(False)
     plt.grid()
     ax.set_xlabel('x-points')
@@ -105,7 +110,7 @@ def draw_oc_points_series(point_series, cell_width = 1, is_point_class=True):
 
 class OneCenterSimulator:
     def __init__(self, eps, max_radius=MAX_RADIUS, window_size=WINDOW_SIZE):
-        self.eps = eps / 2
+        self.eps = eps
         self.max_radius = max_radius
         self.oc_solvers = []
         self.current_time = 0
@@ -114,10 +119,11 @@ class OneCenterSimulator:
         self.alive_points = []
 
         alpha_tmp = self.eps
-        oc_count = int(math.log(self.max_radius/self.eps, (1+self.eps))) + 1
+        eps_tmp = eps / 2
+        oc_count = int(math.log(self.max_radius/eps_tmp, (1+eps_tmp))) + 1
         for i in range(oc_count):
             self.oc_solvers.append( OneCenterSolver(self.eps, alpha_tmp))
-            alpha_tmp *= 1 + self.eps
+            alpha_tmp *= 1 + eps_tmp
 
     @staticmethod
     def find_one_center(entry_points):
@@ -163,5 +169,6 @@ class OneCenterSimulator:
 
     def demo_execute_one_cycle(self):
         expected_center, expected_radius, ocs_result = self.execute_one_cycle()
-        draw_points_series([(get_points_of_entries(self.alive_points), expected_center.point, expected_radius),
+        print expected_radius >= ocs_result.alpha, expected_radius, ocs_result.alpha
+        draw_oc_points_series([(get_points_of_entries(self.alive_points), expected_center.point, expected_radius),
         ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)

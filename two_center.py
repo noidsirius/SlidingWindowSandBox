@@ -133,7 +133,7 @@ def draw_tc_points_series(point_series, cell_width = 1, is_point_class=True, max
 
 class TwoCenterSimulator:
     def __init__(self, eps, max_radius=MAX_RADIUS, window_size=WINDOW_SIZE):
-        self.eps = eps / 2
+        self.eps = eps
         self.max_radius = max_radius
         self.tc_solvers = []
         self.current_time = 0
@@ -142,10 +142,11 @@ class TwoCenterSimulator:
         self.alive_points = []
 
         alpha_tmp = self.eps
-        tc_count = int(math.log(self.max_radius/self.eps, (1+self.eps))) + 1
+        eps_tmp = eps / 2
+        tc_count = int(math.log(self.max_radius/eps_tmp, (1+eps_tmp))) + 1
         for i in range(tc_count):
             self.tc_solvers.append( TwoCenterSolver(self.eps, alpha_tmp))
-            alpha_tmp *= 1 + self.eps
+            alpha_tmp *= 1 + eps_tmp
 
     @staticmethod
     def find_two_center(entry_points):
