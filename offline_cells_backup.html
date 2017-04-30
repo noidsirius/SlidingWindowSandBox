@@ -1,0 +1,83 @@
+<html>
+<head>
+  <meta charset="UTF-8"/>
+ <link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+ <script type="text/javascript" src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script>
+</head>
+<body>
+  <div id="jxgbox" class="jxgbox" style="width:500px; height:500px;"></div>
+<script type="text/javascript">
+ // var board = JXG.JSXGraph.initBoard('box', {boundingbox: [-10, 10, 10, -10], axis:true});
+ // brd = JXG.JSXGraph.initBoard('jxgbox',{boundingbox:[-2,2,2,-2], keepaspectratio:true, axis:true});
+ // p = brd.createElement('point',[1.5,1.5],{face:'o', size:8, strokeColor:'red', fillOpacity:0.6, strokeOpacity: 0.6});
+ // brd.createElement('segment',[[0,0],p],{dash:3});
+ var points = [];
+ var getMouseCoords = function(e, i) {
+         var cPos = board.getCoordsTopLeftCorner(e, i),
+             absPos = JXG.getPosition(e, i),
+             dx = absPos[0]-cPos[0],
+             dy = absPos[1]-cPos[1];
+
+         return new JXG.Coords(JXG.COORDS_BY_SCREEN, [dx, dy], board);
+     },
+     down = function(e) {
+         var canCreate = true, i, coords, el;
+
+         if (e[JXG.touchProperty]) {
+             // index of the finger that is used to extract the coordinates
+             i = 0;
+         }
+         coords = getMouseCoords(e, i);
+         for (el in board.objects) {
+           if(JXG.isPoint(board.objects[el]))
+             if(JXG.isPoint(board.objects[el]) && board.objects[el].hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+                 canCreate = false;
+                 break;
+             }
+         }
+
+         if (canCreate) {
+
+             var p = board.create('point', [coords.usrCoords[1], coords.usrCoords[2]]);
+             points.push(p);
+            if(points.length > 2)
+              board.create('circle', points.slice(-3));
+         }
+         else{
+          //  alert("NO");
+         }
+     },
+     delta = 5,
+     alpha = 10,
+     MAX_LENGTH = alpha+2*alpha/delta,
+     board = JXG.JSXGraph.initBoard('jxgbox', {boundingbox: [-MAX_LENGTH,MAX_LENGTH,MAX_LENGTH,-MAX_LENGTH], axis: true, grid:true});
+     //Init
+     var p = board.create('point', [0, 0]);
+     points.push(p);
+     p = board.create('point', [0, alpha/delta]);
+     points.push(p);
+     p = board.create('point', [alpha/delta, 0]);
+     points.push(p);
+     p = board.create('point', [alpha/delta, alpha/delta]);
+     points.push(p);
+
+     var rectangle = [];
+     p = board.create('point',[-alpha,-alpha], {face:'[]'})
+     rectangle.push(p);
+     p = board.create('point',[-alpha,alpha+alpha/delta], {face:'[]'})
+     rectangle.push(p);
+     p = board.create('point',[alpha+alpha/delta,alpha+alpha/delta], {face:'[]'})
+     rectangle.push(p);
+     p = board.create('point',[alpha+alpha/delta,-alpha], {face:'[]'})
+     rectangle.push(p);
+     board.create('polygon',rectangle);
+
+     board.create('circle', [points[0], alpha]);
+     board.create('circle', [points[1], alpha]);
+     board.create('circle', [points[2], alpha]);
+     board.create('circle', [points[3], alpha]);
+     board.on('down', down);
+</script>
+
+</body>
+</html>
