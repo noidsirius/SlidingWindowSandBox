@@ -39,13 +39,19 @@ class TwoCenterSolver:
             if not ep.is_alive() or self.point_util.is_in_same_cell(ep.point, new_entry_point.point):
                 self.my_alpha_entry_points.remove(ep)
         self.my_alpha_entry_points.append(new_entry_point)
-        r_radius, r_center_1, r_center_2 = TwoCenterSolver.find_two_cell_center(self.my_alpha_entry_points, self.point_util)
         max_valid_distance = self.alpha *(1 + self.eps)
+        if self.center_1 and self.center_2 and self.center_1.is_alive() and self.center_2.is_alive():
+            cell_dis = min(self.point_util.get_cell_distance(new_entry_point.point, self.center_1.point),\
+                            self.point_util.get_cell_distance(new_entry_point.point, self.center_2.point))
+            if cell_dis <= max_valid_distance:
+                self.radius = max(self.radius, cell_dis)
+                return
+        r_radius, r_center_1, r_center_2 = TwoCenterSolver.find_two_cell_center(self.my_alpha_entry_points, self.point_util)
         if len(self.my_alpha_entry_points) <= 2:
             self.center_1 = self.my_alpha_entry_points[0]
             self.center_2 = self.my_alpha_entry_points[0] if len(self.my_alpha_entry_points) == 1 else self.my_alpha_entry_points[1]
             self.radius = 0
-        elif r_radius < max_valid_distance:
+        elif r_radius <= max_valid_distance:
             self.center_1 = r_center_1
             self.center_2 = r_center_2
             self.radius = r_radius

@@ -43,7 +43,7 @@ class OneCenterSolver:
         if r_center is None and len(self.my_alpha_entry_points) == 1:
             self.center = self.my_alpha_entry_points[0]
             self.radius = 0
-        elif r_radius < max_valid_distance:
+        elif r_radius <= max_valid_distance:
             self.center = r_center
             self.radius = r_radius
         else:

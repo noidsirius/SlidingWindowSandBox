@@ -18,19 +18,19 @@ def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=
         # print tc_simulator.current_time, expected_radius, tcs_result.radius
         # is_correct = (tcs_result.radius / expected_radius) < (1 + tc_simulator.eps*1.1) and expected_radius <= tcs_result.radius
         is_correct = tcs_result.alpha <= expected_radius <= tcs_result.alpha * (1+eps)
-        print tc_simulator.current_time, is_correct, expected_radius, tcs_result.radius, tcs_result.alpha
+        print tc_simulator.current_time, is_correct, tcs_result.alpha, expected_radius, tcs_result.radius
         # # print oc_simulator.current_time, is_correct, ocs_result.radius, expected_radius ,\
         # #  len(oc_simulator.alive_points),\
         # #  len(ocs_result.my_alpha_entry_points),\
         # #   [len(ocs.my_alpha_entry_points) for ocs in oc_simulator.oc_solvers]
         #
-        # # in case of any bug
-        # if is_correct == False and not expected_radius <= oc_simulator.eps :
-        #     print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
-        #     draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
-        #     ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
-        #     print oc_simulator.alive_points, ocs_result.my_alpha_entry_points, ocs_result.alpha
-        #     break
+        # in case of any bug
+        if is_correct == False and not expected_radius <= tc_simulator.eps :
+            print tc_simulator.current_time, is_correct , expected_radius, tcs_result.radius
+            # draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
+            # ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
+            # print oc_simulator.alive_points, ocs_result.my_alpha_entry_points, ocs_result.alpha
+            break
 
 def init_points(file_name):
     input_points = []
@@ -64,7 +64,8 @@ def init_points(file_name):
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         # run_simulator()
-        run_simulator(simulation_time=1000, eps=0.5, max_radius=10000, window_size=20)
+        # run_simulator(simulation_time=200, eps=0.9, max_radius=10000, window_size=50)
+        run_simulator(simulation_time=100, eps=0.95, max_radius=100, window_size=30)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)
