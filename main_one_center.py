@@ -1,8 +1,8 @@
 import sys
 import math
 
-from one_center import OneCenterSimulator, draw_oc_points_series, get_points_of_entries
-from utils import Point
+from one_center import OneCenterSimulator, draw_oc_points_series
+from utils import Point, get_points_of_entries
 
 def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None):
     oc_simulator = OneCenterSimulator(eps, max_radius=max_radius, window_size=window_size)

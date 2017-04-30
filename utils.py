@@ -48,6 +48,16 @@ class EntryPoint:
     def __repr__(self):
         return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
 
+def get_points_of_entries(entry_points):
+    return [ep.point for ep in entry_points]
+
+def get_point_coord(point, is_point_class):
+    if is_point_class:
+        x,y = point.x, point.y
+    else:
+        x,y = point
+    return x,y
+
 
 class PointAddress:
 

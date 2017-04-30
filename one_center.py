@@ -4,9 +4,6 @@ import math
 from utils import *
 
 
-def get_points_of_entries(entry_points):
-    return [ep.point for ep in entry_points]
-
 class OneCenterSolver:
     def __init__(self, eps, alpha):
         self.my_alpha_entry_points = []
@@ -61,12 +58,6 @@ class OneCenterSolver:
         radius = self.radius
         return (points, center, radius)
 
-def get_point_coord(point, is_point_class):
-    if is_point_class:
-        x,y = point.x, point.y
-    else:
-        x,y = point
-    return x,y
 
 # point_series => [entry_points, center, radius]
 def draw_oc_points_series(point_series, cell_width = 1, is_point_class=True):
