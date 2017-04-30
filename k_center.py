@@ -15,7 +15,7 @@ def get_min_distance_from_points(source, entry_points, point_util=None):
 
 class KCenterSolver:
     def __init__(self, k, eps, alpha):
-        self.my_alpha_entry_points = []
+        self.entry_points = []
         self.centers = []
         self.radius = INF
         self.alpha = alpha
@@ -48,26 +48,26 @@ class KCenterSolver:
         return self.alpha *(1 + self.eps)
 
     def insert_entry_point(self, new_entry_point):
-        for ep in self.my_alpha_entry_points:
+        for ep in self.entry_points:
             if not ep.is_alive() or self.point_util.is_in_same_cell(ep.point, new_entry_point.point):
-                self.my_alpha_entry_points.remove(ep)
-        self.my_alpha_entry_points.append(new_entry_point)
+                self.entry_points.remove(ep)
+        self.entry_points.append(new_entry_point)
 
     # If there is no solution for this kc_solver, this method clears useless eps
     def clear_extra_entry_points(self, new_entry_point):
         selected_points = [new_entry_point]
         most_recent_farthest_ep = None
-        for ep in reversed(self.my_alpha_entry_points):
+        for ep in reversed(self.entry_points):
             if get_min_distance_from_points(ep, selected_points, self.point_util) > 2 * self.max_valid_distance():
                 if len(selected_points) == self.k:
                     most_recent_farthest_ep = ep
                     break
                 selected_points.append(ep)
         if most_recent_farthest_ep:
-            for ep in self.my_alpha_entry_points:
+            for ep in self.entry_points:
                 cell_dis = get_min_distance_from_points(ep, selected_points, self.point_util)
                 if ep != most_recent_farthest_ep and cell_dis> 2 * self.max_valid_distance():
-                    self.my_alpha_entry_points.remove(ep)
+                    self.entry_points.remove(ep)
             return True
         return False
 
@@ -84,7 +84,7 @@ class KCenterSolver:
         if self.does_new_point_fit(new_entry_point):
             return
 
-        r_radius, r_centers = KCenterSolver.find_k_center(self.my_alpha_entry_points, self.k, self.point_util)
+        r_radius, r_centers = KCenterSolver.find_k_center(self.entry_points, self.k, self.point_util)
         if r_radius <= self.max_valid_distance():
             self.centers = r_centers
             self.radius = r_radius
@@ -94,7 +94,7 @@ class KCenterSolver:
             self.radius = INF
 
     def get_points_for_draw(self):
-        points = [self.point_util.get_point_address(ep.point).get_center_point() for ep in self.my_alpha_entry_points]
+        points = [self.point_util.get_point_address(ep.point).get_center_point() for ep in self.entry_points]
         centers = [self.point_util.get_point_address(center.point).get_center_point() for center in self.centers] if self.centers else None
         radius = self.radius
         return (points, centers, radius)
@@ -201,5 +201,5 @@ class KCenterSimulator:
         # print self.alive_points
         # for tcs in self.tc_solvers:
         #     print tcs.alpha
-        #     print tcs.my_alpha_entry_points
+        #     print tcs.entry_points
         #     print "-----------"

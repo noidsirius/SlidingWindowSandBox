@@ -20,15 +20,15 @@ def run_simulator(k=1, simulation_time=10000, eps=0.7, max_radius=10000, window_
         print kc_simulator.current_time, is_correct, kcs_result.alpha, expected_radius, kcs_result.radius
         # print oc_simulator.current_time, is_correct, ocs_result.radius, expected_radius ,\
         #  len(oc_simulator.alive_points),\
-        #  len(ocs_result.my_alpha_entry_points),\
-        #   [len(ocs.my_alpha_entry_points) for ocs in oc_simulator.oc_solvers]
+        #  len(ocs_result.entry_points),\
+        #   [len(ocs.entry_points) for ocs in oc_simulator.oc_solvers]
 
         # in case of any bug
         if is_correct == False and not expected_radius <= kc_simulator.eps :
             # print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
             # draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
             # ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
-            # print oc_simulator.alive_points, ocs_result.my_alpha_entry_points, ocs_result.alpha
+            # print oc_simulator.alive_points, ocs_result.entry_points, ocs_result.alpha
             break
 
 def init_points(file_name):
