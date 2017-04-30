@@ -25,6 +25,11 @@ class KCenterSolver:
 
     @staticmethod
     def find_k_center(entry_points, k, point_util = None):
+        if len(entry_points) < k:
+            centers = [entry_points[i%len(entry_points)] for i in range(k)]
+            radius = 0
+            return radius, centers
+
         radius = INF
         centers = None
         for possible_centers in combinations(entry_points, k):
@@ -38,41 +43,53 @@ class KCenterSolver:
                 radius, centers = min_radius, possible_centers
         return radius, list(centers) if centers else None
 
+
+    def max_valid_distance(self):
+        return self.alpha *(1 + self.eps)
+
     def insert_entry_point(self, new_entry_point):
         for ep in self.my_alpha_entry_points:
             if not ep.is_alive() or self.point_util.is_in_same_cell(ep.point, new_entry_point.point):
                 self.my_alpha_entry_points.remove(ep)
         self.my_alpha_entry_points.append(new_entry_point)
-        max_valid_distance = self.alpha *(1 + self.eps)
+
+    # If there is no solution for this kc_solver, this method clears useless eps
+    def clear_extra_entry_points(self, new_entry_point):
+        selected_points = [new_entry_point]
+        most_recent_farthest_ep = None
+        for ep in reversed(self.my_alpha_entry_points):
+            if get_min_distance_from_points(ep, selected_points, self.point_util) > 2 * self.max_valid_distance():
+                if len(selected_points) == self.k:
+                    most_recent_farthest_ep = ep
+                    break
+                selected_points.append(ep)
+        if most_recent_farthest_ep:
+            for ep in self.my_alpha_entry_points:
+                cell_dis = get_min_distance_from_points(ep, selected_points, self.point_util)
+                if ep != most_recent_farthest_ep and cell_dis> 2 * self.max_valid_distance():
+                    self.my_alpha_entry_points.remove(ep)
+            return True
+        return False
+
+    def does_new_point_fit(self, new_entry_point):
         if self.centers and all([c.is_alive() for c in  self.centers]):
             cell_dis = get_min_distance_from_points(new_entry_point, self.centers, self.point_util)
-            if cell_dis <= max_valid_distance:
+            if cell_dis <= self.max_valid_distance():
                 self.radius = max(self.radius, cell_dis)
-                return
+                return True
+        return False
+
+    def execute_one_cycle(self, new_entry_point):
+        self.insert_entry_point(new_entry_point)
+        if self.does_new_point_fit(new_entry_point):
+            return
+
         r_radius, r_centers = KCenterSolver.find_k_center(self.my_alpha_entry_points, self.k, self.point_util)
-        if len(self.my_alpha_entry_points) <= self.k:
-            self.centers = [c for c in self.my_alpha_entry_points]
-            if len(self.centers) < self.k:
-                self.centers += [self.my_alpha_entry_points[0] for i in range(self.k - len(self.centers))]
-            self.radius = 0
-        elif r_radius <= max_valid_distance:
+        if r_radius <= self.max_valid_distance():
             self.centers = r_centers
             self.radius = r_radius
         else:
-            selected_points = [new_entry_point]
-            most_recent_farthest_ep = None
-            for ep in reversed(self.my_alpha_entry_points):
-                if get_min_distance_from_points(ep, selected_points, self.point_util) > 2*max_valid_distance:
-                    if len(selected_points) == self.k:
-                        most_recent_farthest_ep = ep
-                        break
-                    selected_points.append(ep)
-            if most_recent_farthest_ep:
-                for ep in self.my_alpha_entry_points:
-                    cell_dis = get_min_distance_from_points(ep, selected_points, self.point_util)
-                    if ep != most_recent_farthest_ep and \
-                            cell_dis> 2 * max_valid_distance:
-                        self.my_alpha_entry_points.remove(ep)
+            self.clear_extra_entry_points(new_entry_point)
             self.centers = None
             self.radius = INF
 
@@ -139,6 +156,7 @@ class KCenterSimulator:
         self.entry_points = []
         self.alive_points = []
 
+        # Create parallel kc_solvers
         alpha_tmp = self.eps
         eps_tmp = eps / 2
         kc_count = int(math.log(self.max_radius/eps_tmp, (1+eps_tmp))) + 1
@@ -166,15 +184,11 @@ class KCenterSimulator:
         kc_result = INF
         kcs_result = None
         for kcs in self.kc_solvers:
-            kcs.insert_entry_point(new_entry_point)
+            kcs.execute_one_cycle(new_entry_point)
             if kcs.radius < INF and kc_result == INF:
                 kc_result = kcs.radius
                 kcs_result = kcs
         expected_radius, expected_centers = KCenterSolver.find_k_center(self.alive_points, self.k)
-        if expected_radius == 0:
-                expected_centers = [c for c in self.alive_points]
-                if len(expected_centers) < self.k:
-                    expected_centers += [self.alive_points[0] for i in range(self.k - len(expected_centers))]
         return (expected_centers, expected_radius, kcs_result)
 
     def demo_execute_one_cycle(self):

@@ -66,7 +66,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         # run_simulator()
         # run_simulator(k=1, simulation_time=40, eps=0.95, max_radius=10, window_size=10)
-        run_simulator(k=3, simulation_time=100, eps=0.95, max_radius=100, window_size=30)
+        run_simulator(k=2, simulation_time=100, eps=0.95, max_radius=100, window_size=30)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)
