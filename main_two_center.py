@@ -2,7 +2,7 @@ import sys
 import math
 
 from two_center import TwoCenterSimulator, draw_tc_points_series
-from utils import Point, get_points_of_entries
+from utils import Point, get_points_of_entries, PointUtil
 
 def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None):
     tc_simulator = TwoCenterSimulator(eps, max_radius=max_radius, window_size=window_size)
@@ -45,7 +45,7 @@ def init_points(file_name):
             cmd = args[0]
             number_of_points = int(args[1])
             if cmd == 'insert_random':
-                input_points += [TwoCenterSimulator.generate_random_point(max_axis_length)\
+                input_points += [PointUtil.generate_random_point(max_axis_length)\
                                     for i in range(number_of_points)]
             elif cmd == 'insert_exact':
                 x = float(args[2])
@@ -56,7 +56,7 @@ def init_points(file_name):
                 input_points += [Point(x,y) for i in range(number_of_points)]
             elif cmd == 'insert_in_range':
                 x_0, y_0, x_1, y_1 = [float(arg) for arg in args[2:6]]
-                input_points += [TwoCenterSimulator.generate_customized_random_point \
+                input_points += [PointUtil.generate_customized_random_point \
                 (x_0, y_0, x_1, y_1) for i in range(number_of_points)]
     return input_points, eps, max_radius, window_size
 

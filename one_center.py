@@ -118,17 +118,6 @@ class OneCenterSimulator:
         for i in range(oc_count):
             self.oc_solvers.append( OneCenterSolver(self.eps, alpha_tmp))
             alpha_tmp *= 1 + self.eps
-    @staticmethod
-    def generate_random_point(max_axis_length):
-        x = random.random() * max_axis_length - max_axis_length/2
-        y = random.random() * max_axis_length - max_axis_length/2
-        return Point(x, y)
-
-    @staticmethod
-    def generate_customized_random_point(x_0, y_0, x_1, y_1):
-        x = random.random() * (x_1 - x_0) + x_0
-        y = random.random() * (y_1 - y_0) + y_0
-        return Point(x, y)
 
     @staticmethod
     def find_one_center(entry_points):
@@ -148,7 +137,7 @@ class OneCenterSimulator:
 
     def insert_entry_point(self, point=None):
         if point is None:
-            point = OneCenterSimulator.generate_random_point(self.max_radius*math.sqrt(2)/2)
+            point = PointUtil.generate_random_point(self.max_radius*math.sqrt(2)/2)
         new_entry_point = EntryPoint(point, self.current_time, window_size=self.window_size)
         self.current_time += 1
         self.entry_points.append(new_entry_point)

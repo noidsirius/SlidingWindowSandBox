@@ -1,4 +1,5 @@
 import math
+import random
 
 MAX_ALPHA = 1000
 INF = 1000*1000
@@ -100,6 +101,18 @@ class PointUtil:
             self.alpha_cells = alpha_cells
         self.alpha = alpha
         self.cell_width = 1.0*self.alpha / self.alpha_cells
+
+    @staticmethod
+    def generate_random_point(max_axis_length):
+        x = random.random() * max_axis_length - max_axis_length/2
+        y = random.random() * max_axis_length - max_axis_length/2
+        return Point(x, y)
+
+    @staticmethod
+    def generate_customized_random_point(x_0, y_0, x_1, y_1):
+        x = random.random() * (x_1 - x_0) + x_0
+        y = random.random() * (y_1 - y_0) + y_0
+        return Point(x, y)
 
     def get_min_max_dis(self, x_addr_1, y_addr_1, x_addr_2, y_addr_2):
         p_addr_1 = PointAddress(x_addr_1, y_addr_1, self.cell_width)
