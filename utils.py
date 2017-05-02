@@ -8,19 +8,27 @@ WINDOW_SIZE = 20
 MAX_RADIUS = 10
 # Alpha should not be greater than 1000
 
+def average(list_of_numbers):
+    if len(list_of_numbers) == 0:
+        return 0
+    return sum(list_of_numbers) / len(list_of_numbers)
+
 class Point:
     """ Create a new Point, at coordinates x, y """
 
-    def __init__(self, x=0, y=0):
+    def __init__(self, x=0.0, y=0.0):
         """ Create a new point at x, y """
-        self.x = x
-        self.y = y
+        self.x = float(x)
+        self.y = float(y)
 
     def distance(self, point):
         return math.sqrt((self.x-point.x)**2 + (self.y-point.y)**2)
 
     def move(self, vec):
         return Point( self.x + vec.x, self.y + vec.y)
+
+    def get_middle(self, point):
+        return Point((self.x + point.x)/2, (self.y + point.y)/2)
 
     def __str__(self):
         return "(%f, %f)" % (self.x, self.y)
@@ -94,9 +102,9 @@ class PointAddress:
 class PointUtil:
 
     def __init__(self, eps=0.1, alpha=1, alpha_cells=0):
-        self.eps = eps / 2
+        self.eps = eps
         if alpha_cells == 0:
-            self.alpha_cells = int(math.ceil((1.0*2*math.sqrt(2))/(1.0*self.eps)))
+            self.alpha_cells = int(math.ceil((1.0*2*math.sqrt(2))/(1.0*self.eps/2)))
         else:
             self.alpha_cells = alpha_cells
         self.alpha = alpha
