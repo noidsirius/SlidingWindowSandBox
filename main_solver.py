@@ -1,33 +1,11 @@
 import sys
 import math
 
-from diameter import DiameterSimulator#, draw_kc_points_series
-from utils import Point, get_points_of_entries, PointUtil
 
-
-def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None):
-    d_simulator = DiameterSimulator(eps, max_radius=max_radius, window_size=window_size)
-    if input_points:
-        simulation_time = len(input_points)
-    for i in range(simulation_time):
-        new_point = input_points[i] if input_points else None
-        expected_extra_data, expected_diameter, ds_result = d_simulator.execute_one_cycle(new_point)
-        if expected_diameter == 0:
-            print("Diameter is 0,", ds_result.result)
-            continue
-
-        is_correct = ds_result.max_result_value <= expected_diameter <= ds_result.max_result_value * (1+eps)
-        print(d_simulator.current_time, is_correct, ds_result.max_result_value, expected_diameter, ds_result.result)
-
-        # in case of any bug
-        if is_correct == False and not expected_diameter <= d_simulator.eps :
-            print "OHOH"
-            # print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
-            # draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
-            # ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
-            # print oc_simulator.alive_points, ocs_result.entry_points, ocs_result.alpha
-            break
-
+from utils import Point, PointUtil
+from geometry_opt_sw import GeometryOptSWSimulator
+from diameter import DiameterSolver
+from k_center import TwoCenterSolver
 
 def init_points(file_name):
     input_points = []
@@ -58,6 +36,33 @@ def init_points(file_name):
     if len(input_points) == 0:
         input_points = None
     return input_points, eps, max_radius, window_size
+
+
+def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None):
+    d_simulator = GeometryOptSWSimulator(TwoCenterSolver, eps, max_radius=max_radius, window_size=window_size)
+    if input_points:
+        simulation_time = len(input_points)
+    for i in range(simulation_time):
+        new_point = input_points[i] if input_points else None
+        ds_result, expected_data = d_simulator.execute_one_cycle(new_point, TwoCenterSolver.find_two_center)
+        expected_diameter, expected_corners = expected_data
+        if expected_diameter == 0:
+            print("Diameter is 0,", ds_result.result)
+            continue
+
+        is_correct = ds_result.max_result_value <= expected_diameter <= ds_result.max_result_value * (1+eps)
+        print(d_simulator.current_time, is_correct, ds_result.max_result_value, expected_diameter, ds_result.result)
+
+        # in case of any bug
+        if is_correct == False and not expected_diameter <= d_simulator.eps :
+            print "OHOH"
+            # print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
+            # draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
+            # ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
+            # print oc_simulator.alive_points, ocs_result.entry_points, ocs_result.alpha
+            break
+
+
 
 
 if __name__ == "__main__":

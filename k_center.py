@@ -4,7 +4,7 @@ import math
 from itertools import combinations
 
 from utils import *
-
+from geometry_opt_sw import GeometryOptSWSolver
 
 def get_min_distance_from_points(source, entry_points, point_util=None):
     if point_util:
@@ -12,6 +12,63 @@ def get_min_distance_from_points(source, entry_points, point_util=None):
     else:
         dis = min([ep.point.distance(source.point) for ep in entry_points])
     return dis
+
+k = 2
+class TwoCenterSolver(GeometryOptSWSolver):
+    def __init__(self, eps, max_result_value):
+        super(TwoCenterSolver, self).__init__(eps, max_result_value, TwoCenterSolver.find_two_center)
+
+
+    @staticmethod
+    def find_two_center(entry_points, geometry_solver=None):
+        point_util = None
+        if geometry_solver:
+            point_util = geometry_solver.point_util
+
+        if len(entry_points) < k:
+            centers = [entry_points[i % len(entry_points)] for i in range(k)]
+            radius = 0
+            return radius, centers
+
+        radius = INF
+        centers = None
+        for possible_centers in combinations(entry_points, k):
+            min_radius = 0
+            for ep in entry_points:
+                if ep in possible_centers:
+                    continue
+                dis = get_min_distance_from_points(ep, possible_centers, point_util)
+                min_radius = max(min_radius, dis)
+            if min_radius < radius:
+                radius, centers = min_radius, possible_centers
+        return radius, list(centers) if centers else None
+
+    def clear_extra_entry_points(self, new_entry_point):
+        selected_points = [new_entry_point]
+        most_recent_farthest_ep = None
+        for ep in reversed(self.entry_points):
+            if get_min_distance_from_points(ep, selected_points, self.point_util) > 2 * self.max_valid_distance():
+                if len(selected_points) == k:
+                    most_recent_farthest_ep = ep
+                    break
+                selected_points.append(ep)
+        if most_recent_farthest_ep:
+            for ep in self.entry_points:
+                cell_dis = get_min_distance_from_points(ep, selected_points, self.point_util)
+                if ep != most_recent_farthest_ep and cell_dis > 2 * self.max_valid_distance():
+                    self.entry_points.remove(ep)
+            return True
+        return False
+
+    def does_new_point_fit(self, new_entry_point):
+        centers = self.extra_data
+        if centers and all([c.is_alive() for c in centers]):
+            cell_dis = get_min_distance_from_points(new_entry_point, centers, self.point_util)
+            if cell_dis <= self.max_valid_distance():
+                self.result = max(self.result, cell_dis)
+                return True
+        return False
+
 
 class KCenterSolver:
     def __init__(self, k, eps, alpha):
