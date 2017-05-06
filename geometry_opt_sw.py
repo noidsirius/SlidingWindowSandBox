@@ -2,16 +2,17 @@ from utils import *
 
 
 class GeometryOptSWSolver(object):
-    def __init__(self, eps, max_result_value):
+    def __init__(self, eps, max_result_value, approx_factor=1):
         self.entry_points = []
         self.result = INF
+        self.approx_factor = approx_factor
         self.extra_data = None
         self.max_result_value = max_result_value
         self.eps = eps
         self.point_util = PointUtil(self.eps, self.max_result_value)
 
     def max_valid_distance(self):
-        return self.max_result_value * (1 + self.eps)
+        return self.max_result_value * (1 + self.eps) * self.approx_factor
 
     def find_result(self, entry_points, geometry_solver=None):
         return INF, None
@@ -54,9 +55,8 @@ class GeometryOptSWSolver(object):
         return points
 
 
-
 class GeometryOptSWSimulator:
-    def __init__(self, geometry_opt_sw_solver_class, eps, max_radius=MAX_RADIUS, window_size=WINDOW_SIZE):
+    def __init__(self, geometry_opt_sw_solver_class, eps, max_radius=MAX_RADIUS, window_size=WINDOW_SIZE, approx_factor=1):
         self.eps = eps
         self.max_radius = max_radius
         self.gosw_solvers = []
@@ -64,13 +64,14 @@ class GeometryOptSWSimulator:
         self.window_size = window_size
         self.entry_points = []
         self.alive_points = []
+        self.approx_factor = approx_factor
 
         # Create parallel solvers
         alpha_tmp = self.eps
         eps_tmp = eps / 2
         d_count = int(math.log(self.max_radius/eps_tmp, (1+eps_tmp))) + 1
         for i in range(d_count):
-            self.gosw_solvers.append(geometry_opt_sw_solver_class(self.eps, alpha_tmp))
+            self.gosw_solvers.append(geometry_opt_sw_solver_class(self.eps, alpha_tmp, approx_factor=self.approx_factor))
             alpha_tmp *= 1 + eps_tmp
 
     def insert_entry_point(self, point=None):

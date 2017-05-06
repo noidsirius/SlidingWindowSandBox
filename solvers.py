@@ -31,15 +31,46 @@ class KCenterCalculator:
                 radius, centers = min_radius, possible_centers
         return radius, list(centers) if centers else None
 
+    def find_approx_k_center(self, entry_points, geometry_solver=None):
+        point_util = None
+        if geometry_solver:
+            point_util = geometry_solver.point_util
+
+        if len(entry_points) <= self.k:
+            centers = [entry_points[i % len(entry_points)] for i in range(self.k)]
+            radius = 0
+            return radius, centers
+
+        centers = [entry_points[0]]
+        for i in range(1,self.k):
+            next_center = None
+            distance = 0
+            for ep in entry_points:
+                ep_dis = PointUtil.get_min_distance_from_points(ep, centers, point_util)
+                if distance < ep_dis:
+                    distance = ep_dis
+                    next_center = ep
+            centers.append(next_center)
+
+        radius = 0
+        for ep in entry_points:
+            if ep in centers:
+                continue
+            radius = max(radius, PointUtil.get_min_distance_from_points(ep, centers, point_util))
+        return radius, list(centers) if centers else None
 
 class KCenterSolver(GeometryOptSWSolver):
-    def __init__(self, eps, max_result_value, k=1):
+    def __init__(self, eps, max_result_value, approx_factor=1, k=4):
         self.k = k
-        super(KCenterSolver, self).__init__(eps, max_result_value)
+        super(KCenterSolver, self).__init__(eps, max_result_value, approx_factor=approx_factor)
         self.k_center_calculator = KCenterCalculator(self.k)
 
     def find_result(self, entry_points, geometry_solver=None):
-        return self.k_center_calculator.find_k_center(entry_points, geometry_solver=geometry_solver)
+        approx = True
+        if approx:
+            return self.k_center_calculator.find_approx_k_center(entry_points, geometry_solver=geometry_solver)
+        else:
+            return self.k_center_calculator.find_k_center(entry_points, geometry_solver=geometry_solver)
 
     def clear_extra_entry_points(self, new_entry_point):
         selected_points = [new_entry_point]
@@ -69,8 +100,8 @@ class KCenterSolver(GeometryOptSWSolver):
 
 
 class DiameterSolver(GeometryOptSWSolver):
-    def __init__(self, eps, max_result_value):
-        super(DiameterSolver, self).__init__(eps, max_result_value)
+    def __init__(self, eps, max_result_value, approx_factor=1):
+        super(DiameterSolver, self).__init__(eps, max_result_value, approx_factor=approx_factor)
 
     def find_result(self, entry_points, geometry_solver=None):
         return DiameterSolver.find_diameter(entry_points, geometry_solver)

@@ -83,7 +83,9 @@ def draw_kc_points_series(point_series, cell_width = 1, is_point_class=True, max
 
 def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None,
                     solver=DiameterSolver, debug_method=DiameterSolver.find_diameter):
-    d_simulator = GeometryOptSWSimulator(solver, eps, max_radius=max_radius, window_size=window_size)
+    approx_factor = 2
+    d_simulator = GeometryOptSWSimulator(solver, eps, max_radius=max_radius, window_size=window_size,
+                                         approx_factor=approx_factor)
     if input_points:
         simulation_time = len(input_points)
     for i in range(simulation_time):
@@ -91,11 +93,13 @@ def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=
         ds_result, expected_data = d_simulator.execute_one_cycle(new_point, debug_method)
         expected_diameter, expected_corners = expected_data
         if expected_diameter == 0:
-            print("Diameter is 0,", ds_result.result)
+            print("Result is 0,", ds_result.result)
             continue
 
         is_correct = ds_result.max_result_value <= expected_diameter <= ds_result.max_result_value * (1+eps)
-        print(d_simulator.current_time, is_correct, ds_result.max_result_value, expected_diameter, ds_result.result)
+        is_correct = expected_diameter <= ds_result.result <= expected_diameter * (1+eps) * approx_factor
+        # print(d_simulator.current_time, is_correct, ds_result.max_result_value, expected_diameter, ds_result.result)
+        print(d_simulator.current_time, (ds_result.result / expected_diameter) > (1+eps) , is_correct, expected_diameter, ds_result.result, expected_diameter * (1+eps) * approx_factor)
 
         # in case of any bug
         if is_correct == False and not expected_diameter <= d_simulator.eps :
@@ -114,7 +118,7 @@ if __name__ == "__main__":
         # run_simulator()
         # run_simulator(k=1, simulation_time=40, eps=0.95, max_radius=10, window_size=10)
         run_simulator(simulation_time=10000, eps=0.5, max_radius=10, window_size=30, solver=KCenterSolver,
-                      debug_method=KCenterCalculator(1).find_k_center)
+                      debug_method=KCenterCalculator(4).find_k_center)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)
