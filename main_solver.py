@@ -4,7 +4,8 @@ import math
 
 from utils import Point, PointUtil, MAX_RADIUS, get_point_coord
 from geometry_opt_sw import GeometryOptSWSimulator
-from solvers import DiameterSolver, TwoCenterSolver
+from solvers import DiameterSolver, KCenterSolver, KCenterCalculator
+
 
 def init_points(file_name):
     input_points = []
@@ -112,8 +113,8 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         # run_simulator()
         # run_simulator(k=1, simulation_time=40, eps=0.95, max_radius=10, window_size=10)
-        run_simulator(simulation_time=10000, eps=0.5, max_radius=10, window_size=30, solver=TwoCenterSolver,
-                      debug_method=TwoCenterSolver.find_two_center)
+        run_simulator(simulation_time=10000, eps=0.5, max_radius=10, window_size=30, solver=KCenterSolver,
+                      debug_method=KCenterCalculator(1).find_k_center)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)

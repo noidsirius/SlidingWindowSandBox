@@ -2,17 +2,19 @@ from utils import *
 
 
 class GeometryOptSWSolver(object):
-    def __init__(self, eps, max_result_value, solver_method):
+    def __init__(self, eps, max_result_value):
         self.entry_points = []
         self.result = INF
         self.extra_data = None
         self.max_result_value = max_result_value
         self.eps = eps
         self.point_util = PointUtil(self.eps, self.max_result_value)
-        self.solver_method = solver_method
 
     def max_valid_distance(self):
         return self.max_result_value * (1 + self.eps)
+
+    def find_result(self, entry_points, geometry_solver=None):
+        return INF, None
 
     def insert_entry_point(self, new_entry_point):
         for ep in self.entry_points:
@@ -39,7 +41,7 @@ class GeometryOptSWSolver(object):
             self.extra_data = None
             self.result = INF
 
-        r_result, r_extra_data = self.solver_method(self.entry_points, self)
+        r_result, r_extra_data = self.find_result(self.entry_points, self)
         if r_result <= self.max_valid_distance():
             self.extra_data = r_extra_data
             self.result = r_result
@@ -94,7 +96,7 @@ class GeometryOptSWSimulator:
                 result = solver.result
                 solver_result = solver
         if debug_method:
-            return (solver_result, debug_method(self.alive_points))
+            return solver_result, debug_method(self.alive_points)
         else:
             return solver_result
 
