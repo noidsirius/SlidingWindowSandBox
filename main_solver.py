@@ -2,10 +2,9 @@ import sys
 import math
 
 
-from utils import Point, PointUtil
+from utils import Point, PointUtil, MAX_RADIUS, get_point_coord
 from geometry_opt_sw import GeometryOptSWSimulator
-from diameter import DiameterSolver
-from k_center import TwoCenterSolver
+from solvers import DiameterSolver, TwoCenterSolver
 
 def init_points(file_name):
     input_points = []
@@ -38,13 +37,57 @@ def init_points(file_name):
     return input_points, eps, max_radius, window_size
 
 
-def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None):
-    d_simulator = GeometryOptSWSimulator(TwoCenterSolver, eps, max_radius=max_radius, window_size=window_size)
+def draw_kc_points_series(point_series, cell_width = 1, is_point_class=True, max_radius=MAX_RADIUS):
+    import matplotlib.pyplot as plt
+    import numpy
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xticks(numpy.arange(1.0*-max_radius/2, 1.0*max_radius/2, cell_width))
+    ax.set_yticks(numpy.arange(1.0*-max_radius/2, 1.0*max_radius/2, cell_width))
+    ax.set_autoscale_on(False)
+    plt.grid()
+    ax.set_xlabel('x-points')
+    ax.set_ylabel('y-points')
+    title = ""
+    if cell_width != 1:
+        title += "Cell Width: %f" % cell_width
+
+    colors = 'bgrcmyk'
+    shapes = 'ov^<>12348s'
+    index = 0
+    for points, centers, radius in point_series:
+        index += 1
+        color = colors[index%len(colors)]
+        shape = shapes[index%len(shapes)]
+        x_points = []
+        y_points = []
+        for p in points:
+            x, y = get_point_coord(p, is_point_class)
+            x_points.append(x)
+            y_points.append(y)
+        if centers:
+            for center in centers:
+                center_x, center_y = get_point_coord(center, is_point_class)
+                circle1 = plt.Circle((center_x, center_y), radius, color=color, fill=False, clip_on=False)
+                # TODO: 0.1 should be generalize
+                circle2 = plt.Circle((center_x, center_y), 0.1, color=color, fill=False)
+                ax.add_artist(circle1)
+                ax.add_artist(circle2)
+            title += " %s.Radius = %f" % (color, radius)
+        p = ax.plot(x_points, y_points, '%s%s'%(color,shape))
+
+    ax.set_title(title)
+    fig.show()
+
+
+def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=100, input_points=None,
+                    solver=DiameterSolver, debug_method=DiameterSolver.find_diameter):
+    d_simulator = GeometryOptSWSimulator(solver, eps, max_radius=max_radius, window_size=window_size)
     if input_points:
         simulation_time = len(input_points)
     for i in range(simulation_time):
         new_point = input_points[i] if input_points else None
-        ds_result, expected_data = d_simulator.execute_one_cycle(new_point, TwoCenterSolver.find_two_center)
+        ds_result, expected_data = d_simulator.execute_one_cycle(new_point, debug_method)
         expected_diameter, expected_corners = expected_data
         if expected_diameter == 0:
             print("Diameter is 0,", ds_result.result)
@@ -55,7 +98,7 @@ def run_simulator(simulation_time=10000, eps=0.7, max_radius=10000, window_size=
 
         # in case of any bug
         if is_correct == False and not expected_diameter <= d_simulator.eps :
-            print "OHOH"
+            print("OHOH")
             # print oc_simulator.current_time, is_correct , expected_radius, ocs_result.radius
             # draw_oc_points_series([(get_points_of_entries(oc_simulator.alive_points), expected_center.point, expected_radius),
             # ocs_result.get_points_for_draw()], ocs_result.point_util.cell_width)
@@ -69,7 +112,8 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         # run_simulator()
         # run_simulator(k=1, simulation_time=40, eps=0.95, max_radius=10, window_size=10)
-        run_simulator(simulation_time=10000, eps=0.5, max_radius=10, window_size=30)
+        run_simulator(simulation_time=10000, eps=0.5, max_radius=10, window_size=30, solver=TwoCenterSolver,
+                      debug_method=TwoCenterSolver.find_two_center)
     else:
         points, eps, max_radius, window_size = init_points(sys.argv[1])
         run_simulator(eps=eps, max_radius=max_radius, window_size=window_size, input_points=points)

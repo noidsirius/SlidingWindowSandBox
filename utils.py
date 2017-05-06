@@ -57,8 +57,10 @@ class EntryPoint:
     def __repr__(self):
         return "(%d, %d, %s)" %(self.entry_time, self.age, self.point)
 
+
 def get_points_of_entries(entry_points):
     return [ep.point for ep in entry_points]
+
 
 def get_point_coord(point, is_point_class):
     if is_point_class:
@@ -171,3 +173,34 @@ class PointUtil:
                 max_dis = max(max_dis, tmp_max)
 
         return max(self.alpha-min_dis, max_dis - self.alpha) / self.alpha
+
+    @staticmethod
+    def get_distance_from_point(source, target, point_util=None):
+        if point_util:
+            dis = point_util.get_cell_distance(source.point, target.point)
+        else:
+            dis = source.point.distance(target.point)
+        return dis
+
+    @staticmethod
+    def get_min_distance_from_points(source, entry_points, point_util=None):
+        if point_util:
+            dis = min([point_util.get_cell_distance(ep.point, source.point) for ep in entry_points])
+        else:
+            dis = min([ep.point.distance(source.point) for ep in entry_points])
+        return dis
+
+    @staticmethod
+    def is_in_circle(source, c_ep_1, c_ep_2, point_util=None):
+        if point_util:
+            # TODO need refactor
+            cep1_addr = point_util.get_point_address(c_ep_1.point)
+            cep2_addr = point_util.get_point_address(c_ep_2.point)
+            center_addr = PointAddress((cep1_addr.x_addr + cep2_addr.x_addr) / 2.0,
+                                       (cep1_addr.y_addr + cep2_addr.y_addr) / 2.0, point_util.cell_width)
+            radius = point_util.get_cell_distance(c_ep_1.point, c_ep_2.point) / (2 * (1 + point_util.eps))
+            return center_addr.distance(point_util.get_point_address(source.point)) <= radius
+        else:
+            center = c_ep_1.get_middle(c_ep_2)
+            radius = c_ep_1.distance(c_ep_2.point) / 2
+            return center.distance(source.point) <= radius

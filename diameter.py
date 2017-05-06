@@ -7,16 +7,8 @@ from utils import *
 
 from geometry_opt_sw import GeometryOptSWSolver
 
-def get_distance_from_point(source, target, point_util=None):
-    if point_util:
-        dis = point_util.get_cell_distance(source.point, target.point)
-    else:
-        dis = source.point.distance(target.point)
-    return dis
-
 
 def is_in_circle(source, c_ep_1, c_ep_2, point_util=None):
-
     if point_util:
         # TODO need refactor
         cep1_addr = point_util.get_point_address(c_ep_1.point)
